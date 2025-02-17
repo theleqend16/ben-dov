@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BENİ DÖÖVV BANA SÖVV</title>
+    <style>
+        body {
+            text-align: center;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .game-container {
+            position: relative;
+            display: inline-block;
+            margin-top: 20px;
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .character {
+            width: 200px;
+            transition: transform 0.1s;
+        }
+        .punch {
+            transform: translateX(-10px);
+        }
+        .score {
+            font-size: 24px;
+            margin-top: 10px;
+        }
+        .punch-effect {
+            position: absolute;
+            width: 80px; /* Yumruk efektinin boyutu */
+            height: 80px;
+            background: url('https://i.ibb.co/Q74rs3n1/bilen-konussun-6.png') no-repeat center/contain;
+            pointer-events: none;
+            display: none;
+        }
+        .button-container {
+            margin-top: auto;
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Beni DÖVVV Bana SÖVVV!</h1>
+    <div class="score">SKOR: <span id="score">0</span></div>
+    <div class="game-container" id="gameContainer">
+        <img src="character1.png" id="character" class="character" alt="Character">
+        <div id="punchEffect" class="punch-effect"></div>
+    </div>
+    <div class="button-container">
+        <button class="button" id="resetButton">Reset Score</button>
+        <button class="button" id="soundButton">Toggle Sound</button>
+    </div>
+    <!-- Ses dosyaları -->
+    <audio id="punchSound" src="kick.wav"></audio>
+    <audio id="score5Sound" src="score5.mp3"></audio>
+    <audio id="score10Sound" src="score10.mp3"></audio>
+    <audio id="score15Sound" src="score15.mp3"></audio>
+    <audio id="score20Sound" src="score20.mp3"></audio>
+    <script>
+        let score = 0;
+        let soundEnabled = true;
+        const character = document.getElementById("character");
+        const scoreDisplay = document.getElementById("score");
+        const punchEffect = document.getElementById("punchEffect");
+        const gameContainer = document.getElementById("gameContainer");
+        const punchSound = document.getElementById("punchSound");
+        const score5Sound = document.getElementById("score5Sound");
+        const score10Sound = document.getElementById("score10Sound");
+        const score15Sound = document.getElementById("score15Sound");
+        const score20Sound = document.getElementById("score20Sound");
+        const resetButton = document.getElementById("resetButton");
+        const soundButton = document.getElementById("soundButton");
+        
+        // Karakterin orijinal görseli
+        const originalCharacterSrc = "character1.png";
+        
+        // Alternatif karakter görselleri
+        const characterImages = [
+            "./character2.png", // Skor 4 için
+            "./character3.png", // Skor 8 için
+            "./character4.png", // Skor 12 için
+            "./character5.png", // Skor 16 için
+        ];
+
+// Karakter görselini değiştir
+function changeCharacterImage(score) {
+    let imageIndex;
+    if (score === 4) {
+        imageIndex = 0; // character2.png
+    } else if (score === 8) {
+        imageIndex = 1; // character3.png
+    } else if (score === 12) {
+        imageIndex = 2; // character4.png
+    } else if (score === 16) {
+        imageIndex = 3; // character5.png
+
+    
+    } else {
+         
+        return; // Diğer skorlarda görsel değiştirme
+    }
+
+    // Görseli değiştir
+    character.src = characterImages[imageIndex];
+
+    // 1 saniye sonra orijinal görsele geri dön
+    setTimeout(() => {
+        character.src = originalCharacterSrc;
+    }, 1000);
+}
+        
+        if (character) {
+            gameContainer.addEventListener("click", (event) => {
+                // Tıklama koordinatlarını al
+                const rect = gameContainer.getBoundingClientRect();
+                const clickX = event.clientX - rect.left;
+                const clickY = event.clientY - rect.top;
+                
+                // Skoru artır
+                score++;
+                scoreDisplay.textContent = score;
+                
+                // Karaktere yumruk animasyonu ekle
+                character.classList.add("punch");
+                
+                // Yumruk efektini tam tıklanan yere konumlandır
+                punchEffect.style.left = `${clickX - punchEffect.offsetWidth / 2}px`;
+                punchEffect.style.top = `${clickY - punchEffect.offsetHeight / 2}px`;
+                punchEffect.style.display = "block";
+                
+                // Yumruk sesi çal
+                if (soundEnabled) {
+                    punchSound.currentTime = 0;
+                    punchSound.play();
+                }
+                
+                // Skor kontrolü ve özel sesler
+                if (score % 5 === 0) {
+                    playScoreSound(score);
+                }
+                
+                // Skor kontrolü ve görsel değişimi
+                if (score % 4 === 0) {
+                    changeCharacterImage(score);
+                }
+                
+                // Animasyonu sıfırla
+                setTimeout(() => {
+                    character.classList.remove("punch");
+                    punchEffect.style.display = "none";
+                }, 200);
+            });
+        } else {
+            console.error("Character image not found!");
+        }
+        
+        // Skor seslerini çal
+        function playScoreSound(score) {
+            if (!soundEnabled) return;
+            
+            let sound;
+            switch (score) {
+                case 5:
+                    sound = score5Sound;
+                    break;
+                case 10:
+                    sound = score10Sound;
+                    break;
+                case 15:
+                    sound = score15Sound;
+                    break;
+                case 20:
+                    sound = score20Sound;
+                    break;
+                default:
+                    return;
+            }
+            sound.currentTime = 0;
+            sound.play();
+        }
+        
+        // Karakter görselini değiştir
+        function changeCharacterImage(score) {
+            let imageIndex;
+            if (score === 4) {
+                imageIndex = 0; // character2.png
+            } else if (score === 8) {
+                imageIndex = 1; // character3.png
+            } else if (score === 12) {
+                imageIndex = 2; // character4.png
+            } else if (score === 16) {
+                imageIndex = 3; // character5.png
+
+            }
+
+            // Görseli değiştir
+            character.src = characterImages[imageIndex];
+
+            // 1 saniye sonra orijinal görsele geri dön
+            setTimeout(() => {
+                character.src = originalCharacterSrc;
+            }, 1000);
+        }
+        
+        // Skor sıfırlama butonu
+        resetButton.addEventListener("click", () => {
+            score = 0;
+            scoreDisplay.textContent = score;
+            character.src = originalCharacterSrc; // Skor sıfırlandığında görseli de sıfırla
+        });
+        
+        // Ses açma/kapama butonu
+        soundButton.addEventListener("click", () => {
+            soundEnabled = !soundEnabled;
+            soundButton.textContent = soundEnabled ? "Mute Sound" : "Unmute Sound";
+        });
+    </script>
+</body>
+</html>
